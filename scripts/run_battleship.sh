@@ -62,7 +62,7 @@ fairseq-train data/BinFairseqLibriUnits \
     --scoring wer \
     --find-unused-parameters \
     --max-epoch 200 \
-    --maximize-best-checkpoint-metric --best-checkpoint-metric wer bleu --eval-bleu --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' --eval-bleu-detok moses --eval-bleu-remove-bpe --eval-bleu-print-samples
+    --maximize-best-checkpoint-metric --best-checkpoint-metric bleu --eval-bleu --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' --eval-bleu-detok moses --eval-bleu-remove-bpe --eval-bleu-print-samples
     # ` # evaluation ` \
     # --eval-bleu \
     # --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
