@@ -25,8 +25,8 @@ conda activate fairseq_env
 cd /home/jeffeuxmartin/FairseqAudioWords
 
 fairseq-train data/BinFairseqLibriUnits \
-    --lr 2e-5 \
-    --max-tokens $((10240 * 4)) \
+    --lr 2e-4 \
+    --max-tokens 4096 \
     \
    --user-dir WordlenHintedUnitTranslation/src \
    --task wordlen_translation \
