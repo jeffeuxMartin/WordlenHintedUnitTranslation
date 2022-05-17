@@ -26,7 +26,7 @@ cd /home/jeffeuxmartin/FairseqAudioWords
 
 fairseq-train data/BinFairseqLibriUnits \
     --lr 2e-5 \
-    --max-tokens $((20480 * 4)) \
+    --max-tokens $((10240 * 4)) \
     \
    --user-dir WordlenHintedUnitTranslation/src \
    --task wordlen_translation \
