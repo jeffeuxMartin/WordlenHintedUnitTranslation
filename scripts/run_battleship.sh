@@ -25,6 +25,9 @@ conda activate fairseq_env
 cd /home/jeffeuxmartin/FairseqAudioWords
 
 fairseq-train data/BinFairseqLibriUnits \
+    --lr 2e-5 \
+    --max-tokens 40960 \
+    \
    --user-dir WordlenHintedUnitTranslation/src \
    --task wordlen_translation \
    --arch iwslt_wordlen_transformer --optimizer adam \
@@ -32,7 +35,6 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     ` # learning ` \
     --clip-norm 1.0 \
-    --lr 2e-4 \
     --lr-scheduler inverse_sqrt \
     --warmup-updates 4000 \
     \
@@ -43,7 +45,6 @@ fairseq-train data/BinFairseqLibriUnits \
     ` # training ` \
     --criterion label_smoothed_cross_entropy \
     --label-smoothing 0.1 \
-    --max-tokens 20480 \
     \
     ` # logging ` \
     --wandb-project ok_fairseq \
@@ -55,7 +56,7 @@ fairseq-train data/BinFairseqLibriUnits \
     --best-checkpoint-metric wer \
     --maximize-best-checkpoint-metric \
     \
-    --fp16
+    --fp16 \
     \
     --eval-wer
     # ` # evaluation ` \
