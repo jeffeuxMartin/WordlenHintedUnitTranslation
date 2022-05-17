@@ -53,6 +53,7 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     ` # saving ` \
     --keep-best-checkpoints 5 \
+    --keep-last-epochs 5 \
     ` # --best-checkpoint-metric wer ` \
     ` # --maximize-best-checkpoibnt-metric ` \
     \
@@ -70,3 +71,9 @@ fairseq-train data/BinFairseqLibriUnits \
     # --eval-bleu-print-samples \
     # \
 
+# TODO: length weight (w)
+# TODO: min length
+# TODO: input alpha?
+# TODO: colllen (用 N not Wordlen)
+# TODO: ASR lower?
+# TODO: pretrained?

@@ -173,7 +173,9 @@ def load_lengthaug_langpair_dataset(
 
 
 @dataclass
-class AdvancedTranslationConfig(TranslationConfig): pass  # len ok!
+class AdvancedTranslationConfig(TranslationConfig):   # len ok!
+    pass
+
 
 @register_task("wordlen_translation", dataclass=AdvancedTranslationConfig)
 class AdvancedTranslationTask(TranslationTask):
@@ -222,3 +224,5 @@ class AdvancedTranslationTask(TranslationTask):
             tgt_dict=self.target_dictionary,
             constraints=constraints,
         )
+        
+
