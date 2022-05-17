@@ -53,8 +53,8 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     ` # saving ` \
     --keep-best-checkpoints 5 \
-    --best-checkpoint-metric wer \
-    --maximize-best-checkpoint-metric \
+    ` # --best-checkpoint-metric wer ` \
+    --maximize-best-checkpoibnt-metric \
     \
     --fp16 \
     \
