@@ -1,7 +1,5 @@
 
 
-cd /home/jeffeuxmartin/FairseqAudioWords
-
 export PATH=`
     `/home/jeffeuxmartin/miniconda3/bin:`
     `/home/jeffeuxmartin/.local/bin:`
@@ -24,6 +22,8 @@ unset __conda_setup
 
 conda activate fairseq_env
 
+cd /home/jeffeuxmartin/FairseqAudioWords
+
 fairseq-train data/BinFairseqLibriUnits \
    --user-dir WordlenHintedUnitTranslation/src \
    --task wordlen_translation \
@@ -43,7 +43,7 @@ fairseq-train data/BinFairseqLibriUnits \
     ` # training ` \
     --criterion label_smoothed_cross_entropy \
     --label-smoothing 0.1 \
-    --max-tokens 10240 \
+    --max-tokens 20480 \
     \
     ` # logging ` \
     --wandb-project ok_fairseq \
@@ -55,12 +55,14 @@ fairseq-train data/BinFairseqLibriUnits \
     --best-checkpoint-metric bleu \
     --maximize-best-checkpoint-metric \
     \
-    ` # evaluation ` \
-    --eval-bleu \
-    --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
-    --eval-bleu-detok moses \
-    --eval-bleu-remove-bpe \
-    --eval-bleu-print-samples \
-    \
     --fp16
+    \
+    --eval-wer
+    # ` # evaluation ` \
+    # --eval-bleu \
+    # --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
+    # --eval-bleu-detok moses \
+    # --eval-bleu-remove-bpe \
+    # --eval-bleu-print-samples \
+    # \
 
