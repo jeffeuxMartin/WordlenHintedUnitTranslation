@@ -58,7 +58,7 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     --fp16 \
     \
-    --eval-wer
+    ----scoring wer 
     # ` # evaluation ` \
     # --eval-bleu \
     # --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
