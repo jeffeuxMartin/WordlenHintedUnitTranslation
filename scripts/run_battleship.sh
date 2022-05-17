@@ -26,7 +26,7 @@ cd /home/jeffeuxmartin/FairseqAudioWords
 
 fairseq-train data/BinFairseqLibriUnits \
     --lr 2e-5 \
-    --max-tokens 40960 \
+    --max-tokens $((20480 * 5)) \
     \
    --user-dir WordlenHintedUnitTranslation/src \
    --task wordlen_translation \
@@ -60,7 +60,7 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     --scoring wer \
     --find-unused-parameters \
-    --max-epoch 20 \
+    --max-epoch 30 \
     
     # ` # evaluation ` \
     # --eval-bleu \
