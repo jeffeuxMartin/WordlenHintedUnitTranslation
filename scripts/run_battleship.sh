@@ -60,7 +60,7 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     --scoring wer \
     --find-unused-parameters \
-    --max-epoch 30 \
+    --max-epoch 200 \
     
     # ` # evaluation ` \
     # --eval-bleu \
