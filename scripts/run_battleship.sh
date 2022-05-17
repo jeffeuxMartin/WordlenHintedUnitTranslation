@@ -29,7 +29,6 @@ fairseq-train data/BinFairseqLibriUnits \
    --task wordlen_translation \
    --arch iwslt_wordlen_transformer --optimizer adam \
     --adam-betas '(0.9, 0.98)' \
-    --clip-norm 0.0 \
     \
     ` # learning ` \
     --clip-norm 1.0 \
@@ -48,8 +47,8 @@ fairseq-train data/BinFairseqLibriUnits \
     \
     ` # logging ` \
     --wandb-project ok_fairseq \
-    --log-file mylogs \
-    --save-dir mysaveddir \
+    --log-file mynewlogs \
+    --save-dir mynewsaveddir \
     \
     ` # saving ` \
     --keep-best-checkpoints 5 \
