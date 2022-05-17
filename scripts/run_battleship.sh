@@ -32,6 +32,7 @@ fairseq-train data/BinFairseqLibriUnits \
     --clip-norm 0.0 \
     \
     ` # learning ` \
+    --clip-norm 1.0 \
     --lr 2e-4 \
     --lr-scheduler inverse_sqrt \
     --warmup-updates 4000 \
