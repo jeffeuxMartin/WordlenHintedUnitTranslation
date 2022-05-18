@@ -100,7 +100,10 @@ def load_lengthaug_langpair_dataset(
         
         wordlen_dataset = load_lengthhint_dataset(prefix + 'len')
         if wordlen_dataset is not None:
+            logger.info("\033[01;31m""Length file loaded!""\033[0m")
             wordlen_datasets.append(wordlen_dataset)
+        else:
+            logger.info("\033[01;33m""NO Length file!""\033[0m")
                 
         
 

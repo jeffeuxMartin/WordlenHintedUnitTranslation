@@ -19,14 +19,13 @@ from .utils import mask_generator
 from fairseq.models.transformer import base_architecture
 
 class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
-    def __init__(self, args, dictionary, embed_tokens):
+    def __init__(self, args, dictionary, embed_tokens, word_extractor=cif_function):
         super().__init__(args, dictionary, embed_tokens)
         embed_dim = embed_tokens.embedding_dim
-        # 幹：word_extractor 拉出來
-        # 幹：dictionary 換？
-        word_extractor = cif_function
+        # Done：word_extractor 拉出來
+        # Done：dictionary 換？
         self.post_initialization(embed_dim, word_extractor)
-        self.use_self = None  # 幹！拿掉 TODO
+        self.use_self = getattr(self.args, 'use_self', False)  # Done?
 
     def post_initialization(self, embed_dim, word_extractor):
         # == encoder == #
@@ -43,39 +42,13 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
     ):
-        """
-        Args:
-            src_tokens (LongTensor): tokens in the source language of shape
-                `(batch, src_len)`
-            src_lengths (torch.LongTensor): lengths of each source sentence of
-                shape `(batch)`
-            return_all_hiddens (bool, optional): also return all of the
-                intermediate hidden states (default: False).
-            token_embeddings (torch.Tensor, optional): precomputed embeddings
-                default `None` will recompute embeddings
-
-        Returns:
-            dict:
-                - **encoder_out** (Tensor): the last encoder layer's output of
-                  shape `(src_len, batch, embed_dim)`
-                - **encoder_padding_mask** (ByteTensor): the positions of
-                  padding elements of shape `(batch, src_len)`
-                - **encoder_embedding** (Tensor): the (scaled) embedding lookup
-                  of shape `(batch, src_len, embed_dim)`
-                - **encoder_states** (List[Tensor]): all intermediate
-                  hidden states of shape `(src_len, batch, embed_dim)`.
-                  Only populated if *return_all_hiddens* is True.
-        """
         return self.forward_scriptable(
             src_tokens, 
             word_length_tensor, alpha_values,  # <--
             src_lengths, return_all_hiddens, token_embeddings
         )
 
-    # TorchScript doesn't support super() method so that the scriptable Subclass
-    # can't access the base class model in Torchscript.
-    # Current workaround is to add a helper function with different name and
-    # call the helper function from scriptable Subclass.
+
     def forward_scriptable(
         self,
         src_tokens,
@@ -101,7 +74,7 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
             alpha_values = self.alpha_predictor(encoder__last_hidden_state)
             alpha_values = alpha_values.squeeze(-1).sigmoid()  # B x S
 
-        if word_length_tensor is None or self.use_self:
+        if word_length_tensor is None or self.args.use_self:
             # print("No given! self predict")
             word_length_tensor = alpha_values.sum(-1).long()
         else:
@@ -132,10 +105,10 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         # length_loss = length_loss.contiguous()
 
         encoder_output_attention_mask = (
-            # mask_generator(word_length_tensor) 
-            mask_generator(word_length_tensor) 
+            # mask_generator(word_length_tensor, right_pad=True) 
+            mask_generator(word_length_tensor, right_pad=True)  # Note: fairseq pad another side!
             if word_length_tensor is not None else
-            mask_generator(pred_word_lengths))
+            mask_generator(pred_word_lengths, right_pad=True))
             # TODO: check length prediction!
             
         return (
@@ -165,29 +138,6 @@ class BottleneckedTransformerEncoder(
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
     ):
-        """
-        Args:
-            src_tokens (LongTensor): tokens in the source language of shape
-                `(batch, src_len)`
-            src_lengths (torch.LongTensor): lengths of each source sentence of
-                shape `(batch)`
-            return_all_hiddens (bool, optional): also return all of the
-                intermediate hidden states (default: False).
-            token_embeddings (torch.Tensor, optional): precomputed embeddings
-                default `None` will recompute embeddings
-
-        Returns:
-            dict:
-                - **encoder_out** (Tensor): the last encoder layer's output of
-                  shape `(src_len, batch, embed_dim)`
-                - **encoder_padding_mask** (ByteTensor): the positions of
-                  padding elements of shape `(batch, src_len)`
-                - **encoder_embedding** (Tensor): the (scaled) embedding lookup
-                  of shape `(batch, src_len, embed_dim)`
-                - **encoder_states** (List[Tensor]): all intermediate
-                  hidden states of shape `(src_len, batch, embed_dim)`.
-                  Only populated if *return_all_hiddens* is True.
-        """
         # compute padding mask
         encoder_padding_mask = src_tokens.eq(self.padding_idx)
         has_pads = src_tokens.device.type == "xla" or encoder_padding_mask.any()
@@ -218,14 +168,14 @@ class BottleneckedTransformerEncoder(
         if self.layer_norm is not None:
             x = self.layer_norm(x)
         
-        if not getattr(self.args, "use_self", False):
+        if getattr(self.args, "use_self", False):
             word_length_tensor = None
 
         if not getattr(self.args, "skip_bottleneck", False):
             # T x B x C -> B x T x C
             x = x.transpose(0, 1)
             (
-                x,  # B x T x C'
+                x,  # B x T' x C
                 out_attention_mask,
                 length_loss,
                 pred_word_lengths,
@@ -236,11 +186,11 @@ class BottleneckedTransformerEncoder(
                 word_length_tensor=word_length_tensor,
                 alpha_values=alpha_values,
                 padding_mask=encoder_padding_mask,
-                # return_all=False,
+                return_all=getattr(self.args, "return_all_cif", False),
                 # return_original=False,
             )
 
-            # B x T x C -> T x B x C
+            # B x T' x C -> T' x B x C
             x = x.transpose(0, 1)
             encoder_padding_mask = (1 - out_attention_mask).bool()
 
@@ -262,11 +212,14 @@ class BottleneckedTransformerEncoder(
             "encoder_states": encoder_states,  # List[T x B x C]
             "src_tokens": [],
             "src_lengths": [src_lengths],
+            "encoder_cifall": [
+                encoder__word_representations_CIF
+            ] if getattr(self.args, "return_all_cif", False) else [],
         }
 
 class FrontBottleneckedTransformerEncoder(
     BottleneckedTransformerEncoderPrototype
-):
+  ):
     # TorchScript doesn't support super() method so that the scriptable Subclass
     # can't access the base class model in Torchscript.
     # Current workaround is to add a helper function with different name and
@@ -328,7 +281,7 @@ class FrontBottleneckedTransformerEncoder(
             word_length_tensor=word_length_tensor,
             alpha_values=alpha_values,
             padding_mask=encoder_padding_mask,
-            # return_all=False,
+            return_all=getattr(self.args, "return_all_cif", False),
             # return_original=False,
         )
         encoder_padding_mask = (1 - out_attention_mask).bool()
@@ -374,6 +327,9 @@ class FrontBottleneckedTransformerEncoder(
             "encoder_states": encoder_states,  # List[T x B x C']
             "src_tokens": [],
             "src_lengths": [src_lengths],
+            "encoder_cifall": [
+                encoder__word_representations_CIF
+            ] if getattr(self.args, "return_all_cif", False) else [],
         }
 
 @register_model("wordlen_transformer")
@@ -383,13 +339,16 @@ class BottleneckedTransformerModel(TransformerModel):
         parser.add_argument('--fix-encoder', action='store_true')
         parser.add_argument('--use-self', action='store_true')
         parser.add_argument('--skip-bottleneck', action='store_true')
+        parser.add_argument('--return-all-cif', action='store_true')
         super(BottleneckedTransformerModel, 
               BottleneckedTransformerModel).add_args(parser)
         
     
     @classmethod
     def build_encoder(cls, args, src_dict, embed_tokens):
-        return BottleneckedTransformerEncoder(args, src_dict, embed_tokens)
+        return BottleneckedTransformerEncoder(args, src_dict, embed_tokens,
+            # word_extractor=cif_function,
+        )
     
     @classmethod
     def build_model(cls, args, task):
@@ -405,8 +364,9 @@ class BottleneckedTransformerModel(TransformerModel):
         self,
         src_tokens,
         src_lengths,
-        word_length_tensor,  # <--
         prev_output_tokens,
+        word_length_tensor = None,  # <--
+        alpha_values = None,  # <--
         return_all_hiddens: bool = True,
         features_only: bool = False,
         alignment_layer: Optional[int] = None,
@@ -422,6 +382,7 @@ class BottleneckedTransformerModel(TransformerModel):
             src_tokens, 
             src_lengths=src_lengths, 
             word_length_tensor=word_length_tensor,  # <--
+            alpha_values=alpha_values,  # <--
             return_all_hiddens=return_all_hiddens,
         )
         decoder_out = self.decoder(
@@ -445,12 +406,15 @@ class FrontBottleneckedTransformerModel(TransformerModel):
         parser.add_argument('--fix-encoder', action='store_true')
         parser.add_argument('--use-self', action='store_true')
         parser.add_argument('--skip-bottleneck', action='store_true')
+        parser.add_argument('--return-all-cif', action='store_true')
         super(FrontBottleneckedTransformerModel, 
               FrontBottleneckedTransformerModel).add_args(parser)
     
     @classmethod
     def build_encoder(cls, args, src_dict, embed_tokens):
-        return FrontBottleneckedTransformerEncoder(args, src_dict, embed_tokens)
+        return FrontBottleneckedTransformerEncoder(args, src_dict, embed_tokens,
+            # word_extractor=cif_function,
+        )
         
     # TorchScript doesn't support optional arguments with variable length (**kwargs).
     # Current workaround is to add union of all arguments in child classes.
@@ -458,8 +422,9 @@ class FrontBottleneckedTransformerModel(TransformerModel):
         self,
         src_tokens,
         src_lengths,
-        word_length_tensor,  # <--
         prev_output_tokens,
+        word_length_tensor = None,  # <--
+        alpha_values = None,  # <--
         return_all_hiddens: bool = True,
         features_only: bool = False,
         alignment_layer: Optional[int] = None,
@@ -475,6 +440,7 @@ class FrontBottleneckedTransformerModel(TransformerModel):
             src_tokens, 
             src_lengths=src_lengths, 
             word_length_tensor=word_length_tensor,  # <--
+            alpha_values=alpha_values,  # <--
             return_all_hiddens=return_all_hiddens,
         )
         decoder_out = self.decoder(

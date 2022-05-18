@@ -143,7 +143,7 @@ def load_cached_tokenizer(cls, obj_name, saved_path, unit_clusters=500, msg="Loa
         tokenizer.save_pretrained(saved_path)
     return tokenizer
 
-def mask_generator(X_len, X=None, max_len=None):
+def mask_generator(X_len, X=None, max_len=None, right_pad=False):
     """
     X_len:   mask 的長度們
     X:       要被 mask 的 sequences
@@ -165,11 +165,13 @@ def mask_generator(X_len, X=None, max_len=None):
     else:
         X = torch.zeros(max(X_len), len(X_len))
         X_size = X.size(0)
-    return ((
-        (torch.arange(X_size)[None, :]
-        ).to(X_len.device) 
-        < X_len[:, None]).long()
+    return_value = ((
+        (torch.arange(X_size)[None, :]).to(X_len.device) < X_len[:, None]).long()
     )
+    if right_pad:
+        return return_value.flip(-1)
+    else:
+        return return_value
 
 def get_args():
     parser = argparse.ArgumentParser()
