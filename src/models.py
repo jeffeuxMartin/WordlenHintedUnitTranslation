@@ -41,12 +41,14 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
         use_self: bool = False,
+        minimize_length: bool = False,
       ):
         return self.forward_scriptable(
             src_tokens, 
             word_length_tensor, alpha_values,  # <--
             src_lengths, return_all_hiddens, token_embeddings,
             use_self,
+            minimize_length,
         )
 
     def forward_scriptable(
