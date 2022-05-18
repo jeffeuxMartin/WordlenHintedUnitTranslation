@@ -1,5 +1,5 @@
-# 幹：讓 unit 從 0 ~ 499
-# 幹：增加 model args
+# Done...：讓 unit 從 0 ~ 499
+# Done...：增加 model args
 
 from typing import Optional
 import torch, torch.nn as nn
@@ -25,7 +25,6 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         # Done：word_extractor 拉出來
         # Done：dictionary 換？
         self.post_initialization(embed_dim, word_extractor)
-        self.use_self = getattr(self.args, 'use_self', False)  # Done?
 
     def post_initialization(self, embed_dim, word_extractor):
         # == encoder == #
@@ -41,13 +40,14 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         src_lengths: Optional[torch.Tensor] = None,
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
-    ):
+        use_self: bool = False,
+      ):
         return self.forward_scriptable(
             src_tokens, 
             word_length_tensor, alpha_values,  # <--
-            src_lengths, return_all_hiddens, token_embeddings
+            src_lengths, return_all_hiddens, token_embeddings,
+            use_self,
         )
-
 
     def forward_scriptable(
         self,
@@ -57,7 +57,8 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         src_lengths: Optional[torch.Tensor] = None,
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
-    ):
+        use_self: bool = False,
+      ):
         raise NotImplementedError(
             "Should be overloaded!"
         )
@@ -69,17 +70,20 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         padding_mask=None,
         return_all=False,
         return_original=False,
+        use_self=False,
+        minimize_length=False,
       ):
         if alpha_values is None:
             alpha_values = self.alpha_predictor(encoder__last_hidden_state)
             alpha_values = alpha_values.squeeze(-1).sigmoid()  # B x S
 
-        if word_length_tensor is None or self.args.use_self:
+        if word_length_tensor is None or use_self:
             # print("No given! self predict")
-            word_length_tensor = alpha_values.sum(-1).long()
+            word_length_tensor_touse = alpha_values.sum(-1).long()
         else:
             # print("Wordlen given")
             # predicted_word_length_tensor = alpha_values.sum(-1).long()
+            word_length_tensor_touse = word_length_tensor
             pass
 
         encoder__word_representations_CIF = (
@@ -87,7 +91,7 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
                 encoder__last_hidden_state,
                 alpha=alpha_values,
                 padding_mask=padding_mask,
-                target_lengths=word_length_tensor,
+                target_lengths=word_length_tensor_touse,
             )
         )
         # TODO: Keep all CIF
@@ -96,9 +100,13 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
         encoder_word_representation = encoder_word_representation.contiguous()
         # pred_word_lengths = pred_word_lengths.contiguous()
         # length_loss = 0.
-        length_loss = ((pred_word_lengths, word_length_tensor,)
-            if word_length_tensor is not None else
-            (pred_word_lengths, pred_word_lengths,))
+        if not minimize_length:
+            if word_length_tensor is not None:
+                length_loss = (pred_word_lengths, word_length_tensor,)
+            else:
+                length_loss = (pred_word_lengths, pred_word_lengths,)
+        else:
+            length_loss = (pred_word_lengths, torch.zeros_like(pred_word_lengths),)
             # aliased as `encoder_word_representation`
             # FIXME: distributed problem!
             # TODO: add other CIF ouptuts!
@@ -117,7 +125,6 @@ class BottleneckedTransformerEncoderPrototype(TransformerEncoder):
             length_loss,
             pred_word_lengths,
             encoder__word_representations_CIF if return_all else None,
-            # encoder__last_hidden_state if return_original else None,
             encoder__last_hidden_state if return_original else None,
         )
 
@@ -137,6 +144,8 @@ class BottleneckedTransformerEncoder(
         src_lengths: Optional[torch.Tensor] = None,
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
+        use_self: bool = False,
+        minimize_length: bool = False,
     ):
         # compute padding mask
         encoder_padding_mask = src_tokens.eq(self.padding_idx)
@@ -188,6 +197,8 @@ class BottleneckedTransformerEncoder(
                 padding_mask=encoder_padding_mask,
                 return_all=getattr(self.args, "return_all_cif", False),
                 # return_original=False,
+                use_self=use_self,
+                minimize_length=minimize_length,
             )
 
             # B x T' x C -> T' x B x C
@@ -215,6 +226,7 @@ class BottleneckedTransformerEncoder(
             "encoder_cifall": [
                 encoder__word_representations_CIF
             ] if getattr(self.args, "return_all_cif", False) else [],
+            "length_diff": [length_loss],
         }
 
 class FrontBottleneckedTransformerEncoder(
@@ -232,6 +244,8 @@ class FrontBottleneckedTransformerEncoder(
         src_lengths: Optional[torch.Tensor] = None,
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
+        use_self: bool = False,
+        minimize_length: bool = False,
       ):
         """
         Args:
@@ -283,6 +297,8 @@ class FrontBottleneckedTransformerEncoder(
             padding_mask=encoder_padding_mask,
             return_all=getattr(self.args, "return_all_cif", False),
             # return_original=False,
+            use_self=use_self,
+            minimize_length=minimize_length,
         )
         encoder_padding_mask = (1 - out_attention_mask).bool()
         encoder_embedding = x
@@ -330,16 +346,18 @@ class FrontBottleneckedTransformerEncoder(
             "encoder_cifall": [
                 encoder__word_representations_CIF
             ] if getattr(self.args, "return_all_cif", False) else [],
+            "length_diff": [length_loss],
         }
 
 @register_model("wordlen_transformer")
 class BottleneckedTransformerModel(TransformerModel):
     @staticmethod
     def add_args(parser):
-        parser.add_argument('--fix-encoder', action='store_true')
-        parser.add_argument('--use-self', action='store_true')
-        parser.add_argument('--skip-bottleneck', action='store_true')
-        parser.add_argument('--return-all-cif', action='store_true')
+        parser.add_argument('--fix-encoder', action='store_true', default=False)
+        parser.add_argument('--use-self', action='store_true', default=False)
+        parser.add_argument('--minimize-length', action='store_true', default=False)
+        parser.add_argument('--skip-bottleneck', action='store_true', default=False)
+        parser.add_argument('--return-all-cif', action='store_true', default=False)
         super(BottleneckedTransformerModel, 
               BottleneckedTransformerModel).add_args(parser)
         
@@ -384,6 +402,8 @@ class BottleneckedTransformerModel(TransformerModel):
             word_length_tensor=word_length_tensor,  # <--
             alpha_values=alpha_values,  # <--
             return_all_hiddens=return_all_hiddens,
+            use_self=self.args.use_self,  # <--
+            minimize_length=self.args.minimize_length,  # <--
         )
         decoder_out = self.decoder(
             prev_output_tokens,
@@ -394,6 +414,7 @@ class BottleneckedTransformerModel(TransformerModel):
             src_lengths=src_lengths,
             return_all_hiddens=return_all_hiddens,
         )
+        decoder_out[1]["length_diff"] = encoder_out.get("length_diff", None)
         return decoder_out
 
     def fix_encoder_(self, to_fix=True):
@@ -403,10 +424,11 @@ class BottleneckedTransformerModel(TransformerModel):
 class FrontBottleneckedTransformerModel(TransformerModel):
     @staticmethod
     def add_args(parser):
-        parser.add_argument('--fix-encoder', action='store_true')
-        parser.add_argument('--use-self', action='store_true')
-        parser.add_argument('--skip-bottleneck', action='store_true')
-        parser.add_argument('--return-all-cif', action='store_true')
+        parser.add_argument('--fix-encoder', action='store_true', default=False)
+        parser.add_argument('--use-self', action='store_true', default=False)
+        parser.add_argument('--minimize-length', action='store_true', default=False)
+        parser.add_argument('--skip-bottleneck', action='store_true', default=False)
+        parser.add_argument('--return-all-cif', action='store_true', default=False)
         super(FrontBottleneckedTransformerModel, 
               FrontBottleneckedTransformerModel).add_args(parser)
     
@@ -442,6 +464,8 @@ class FrontBottleneckedTransformerModel(TransformerModel):
             word_length_tensor=word_length_tensor,  # <--
             alpha_values=alpha_values,  # <--
             return_all_hiddens=return_all_hiddens,
+            use_self=self.args.use_self,  # <--
+            minimize_length=self.args.minimize_length,  # <--
         )
         decoder_out = self.decoder(
             prev_output_tokens,
@@ -452,6 +476,7 @@ class FrontBottleneckedTransformerModel(TransformerModel):
             src_lengths=src_lengths,
             return_all_hiddens=return_all_hiddens,
         )
+        decoder_out[1]["length_diff"] = encoder_out.get("length_diff", None)
         return decoder_out
 
     def fix_encoder_(self, to_fix=True):

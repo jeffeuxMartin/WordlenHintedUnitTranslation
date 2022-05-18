@@ -78,15 +78,6 @@ fairseq-train data/BinFairseqLibriUnits \
 # TODO: ASR lower?
 # TODO: pretrained?
 
-
-# region ~~~~ NOTE ~~~~~~~~~~~ #
-# lengthfilename (somehow fixed)
-# use_self (fixed)
-# args.use_self (fixed)
-# paddingright (fixed)
-# return_all (fixed)
-# endregion ~ NOTE ~~~~~~~~~~~ #
-
 # region ~~~ TODO ~~~~~~~~~~~ #
 #   用 wordlen by space!
 #   AE --> ASR --> ST
@@ -98,6 +89,15 @@ fairseq-train data/BinFairseqLibriUnits \
 # @ HuggingFace
 # v lowercase
 # endregion~ TODO ~~~~~~~~~~~ #
+
+
+# region ~~~~ NOTE ~~~~~~~~~~~ #
+# lengthfilename (somehow fixed)
+# use_self (fixed)
+# args.use_self (fixed)
+# paddingright (fixed)
+# return_all (fixed)
+# endregion ~ NOTE ~~~~~~~~~~~ #
 
 
 # region ~~~~~~~~~~~~~~~~~~~~~~~~~~ PLAN FIXME XXX ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
