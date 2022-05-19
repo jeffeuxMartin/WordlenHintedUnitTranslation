@@ -8,6 +8,7 @@ fairseq-train \
     ` # learning ` \
     --lr $LR \
     --max-epoch $EPOCHS \
+    --update-freq "${UPDATE_FREQ:=1}" \
     --max-tokens $MAXTOKENS \
     ` # =========== ` \
     ` # =========== ` \
@@ -55,4 +56,4 @@ fairseq-train \
     --eval-bleu-print-samples \
     \
     
-# --update-freq 2
+
