@@ -27,11 +27,17 @@ conda activate fairseq_env
 
 cd /home/jeffeuxmartin/FairseqAudioWords
 
-DATAPATH=$DATAPATH ` # data/BinDummyUnits ` \
+
+# ` # data/BinDummyUnits `
+# ` # 4096 `
+# ` # 5e-4 `
+# ` # 200 `
+
+DATAPATH=$DATAPATH \
 \
-MAXTOKENS=$MAXTOKENS ` # 4096 ` \
-LR=$LR ` # 5e-4 ` \
-EPOCHS=$EPOCHS ` # 200 ` \
+MAXTOKENS=$MAXTOKENS \
+LR=$LR \
+EPOCHS=$EPOCHS \
 \
 WANDBPROJ=$WANDBPROJ \
 LOG_FILE=$LOG_FILE \
@@ -45,6 +51,7 @@ zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh
 # TODO: ASR lower?
 # TODO: pretrained?
 
+# XXX: silly .txt for English!
 # region ~~~ TODO ~~~~~~~~~~~ #
 #   用 wordlen by space!
 #   AE --> ASR --> ST
