@@ -386,7 +386,8 @@ class BottleneckedTransformerModel(TransformerModel):
             pretrained = None
         model = super().build_model(args, task)
         if pretrained is not None:
-            model = cls(model.args, pretrained.encoder, model.decoder)
+            # model = cls(model.args, pretrained.encoder, model.decoder)
+            model.encoder.load_state_dict(pretrained.encoder.state_dict())
         if getattr(args, "fix_encoder", False):
             args.fix_encoder = True
             model.fix_encoder_()
