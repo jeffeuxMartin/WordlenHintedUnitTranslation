@@ -45,6 +45,7 @@ fairseq-train \
     --keep-last-epochs 5 \
     --scoring wer \
     \
+    $@
     # ` # evaluation ` \
     # --maximize-best-checkpoint-metric \
     # --best-checkpoint-metric bleu \

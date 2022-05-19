@@ -42,7 +42,7 @@ EPOCHS=$EPOCHS \
 WANDBPROJ=$WANDBPROJ \
 LOG_FILE=$LOG_FILE \
 SAVE_DIR=$SAVE_DIR \
-zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh
+zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh $@
 
 # TODO: length weight (w)
 # TODO: min length
