@@ -361,7 +361,7 @@ class BottleneckedTransformerModel(TransformerModel):
         parser.add_argument('--minimize-length', action='store_true', default=False)
         parser.add_argument('--skip-bottleneck', action='store_true', default=False)
         parser.add_argument('--return-all-cif', action='store_true', default=False)
-        parser.add_argument('--pretrained', type=str, default='')
+        parser.add_argument('--jeff-pretrained', type=str, default='')
         super(BottleneckedTransformerModel, 
               BottleneckedTransformerModel).add_args(parser)
         
@@ -374,13 +374,12 @@ class BottleneckedTransformerModel(TransformerModel):
     
     @classmethod
     def build_model(cls, args, task):
-        breakpoint()
-        if args.pretrained != '':
+        if args.jeff_pretrained != '':
             print('\033[01;32m'"Load pretrained model!"'\033[0m')
             # SomehowTODO: if more than 1? better `load_model_ensemble`?
-            assert len(args.pretrained.split(',')) <= 1, "How to more than 1 model?"
+            assert len(args.jeff_pretrained.split(',')) <= 1, "How to more than 1 model?"
             [pretrained], pretrained_args = checkpoint_utils.load_model_ensemble(
-                filenames=[args.pretrained], 
+                filenames=[args.jeff_pretrained], 
                 task=task)
         else:
             pretrained = None
@@ -447,6 +446,7 @@ class FrontBottleneckedTransformerModel(TransformerModel):
         parser.add_argument('--minimize-length', action='store_true', default=False)
         parser.add_argument('--skip-bottleneck', action='store_true', default=False)
         parser.add_argument('--return-all-cif', action='store_true', default=False)
+        parser.add_argument('--jeff-pretrained', type=str, default='')
         super(FrontBottleneckedTransformerModel, 
               FrontBottleneckedTransformerModel).add_args(parser)
     
@@ -455,7 +455,29 @@ class FrontBottleneckedTransformerModel(TransformerModel):
         return FrontBottleneckedTransformerEncoder(args, src_dict, embed_tokens,
             # word_extractor=cif_function,
         )
-        
+
+    
+    @classmethod
+    def build_model(cls, args, task):
+        if args.jeff_pretrained != '':
+            print('\033[01;32m'"Load pretrained model!"'\033[0m')
+            # SomehowTODO: if more than 1? better `load_model_ensemble`?
+            assert len(args.jeff_pretrained.split(',')) <= 1, "How to more than 1 model?"
+            [pretrained], pretrained_args = checkpoint_utils.load_model_ensemble(
+                filenames=[args.jeff_pretrained], 
+                task=task)
+        else:
+            pretrained = None
+        model = super().build_model(args, task)
+        if pretrained is not None:
+            model = cls(model.args, pretrained.encoder, model.decoder)
+        if getattr(args, "fix_encoder", False):
+            args.fix_encoder = True
+            model.fix_encoder_()
+            for param in model.encoder.parameters():
+                param.requires_grad = False
+        return model
+
     # TorchScript doesn't support optional arguments with variable length (**kwargs).
     # Current workaround is to add union of all arguments in child classes.
     def forward(
