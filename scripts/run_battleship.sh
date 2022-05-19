@@ -27,7 +27,7 @@ conda activate fairseq_env
 
 cd /home/jeffeuxmartin/FairseqAudioWords
 
-DATAPATH=$DATAPATH ` # data/BinDummyUnits` \
+DATAPATH=$DATAPATH ` # data/BinDummyUnits ` \
 \
 MAXTOKENS=$MAXTOKENS ` # 4096 ` \
 LR=$LR ` # 5e-4 ` \
