@@ -71,6 +71,10 @@ zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh $@
 # args.use_self (fixed)
 # paddingright (fixed)
 # return_all (fixed)
+
+# # # ＣＣＣ：
+# # # 可以調阿==
+# # # 可以覆寫load weight的函式阿==
 # endregion ~ NOTE ~~~~~~~~~~~ #
 
 # region ~~~~~~~~~~~~~~~~~~~~~~~~~~ PLAN FIXME XXX ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
