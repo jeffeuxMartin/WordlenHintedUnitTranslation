@@ -8,7 +8,7 @@ TGT=en LENDIR=wordlengths LEN=wordlen \
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # #
 DATAPATH=data/BinFairseqLibriUnits \
-  MAXTOKENS=10240 LR=2e-4 EPOCHS=200 \
+  MAXTOKENS=$((40960 / 4)) LR=2e-4 EPOCHS=200 \
   WANDBPROJ=LS_ASR LOG_FILE=ASR_Second__2eNeg4 SAVE_DIR=ASR_try2nd__2eNeg4 \
       hrun -s -c 16 -m 32 -GGGG -g 3080Ti \
       zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
@@ -54,7 +54,7 @@ DATAPATH=data/BinFairseqLibriAE \
 
 # ---------------------
 Original_dataset_path=../AudioWords/data/CoVoSTUnits \
-Unbinarized_dataset_path=data/BinFairseqCoVoSTUnits \
+Unbinarized_dataset_path=data/FairseqCoVoSTUnits \
 Binarized_dataset_path=data/BinFairseqCoVoSTUnits \
 TRAIN_SPLIT=train \
 DEV_SPLIT=dev \

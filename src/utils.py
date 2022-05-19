@@ -143,7 +143,7 @@ def load_cached_tokenizer(cls, obj_name, saved_path, unit_clusters=500, msg="Loa
         tokenizer.save_pretrained(saved_path)
     return tokenizer
 
-def mask_generator(X_len, X=None, max_len=None, right_pad=False):
+def mask_generator(X_len_in, X=None, max_len=None, right_pad=False):
     """
     X_len:   mask 的長度們
     X:       要被 mask 的 sequences
@@ -158,6 +158,7 @@ def mask_generator(X_len, X=None, max_len=None, right_pad=False):
     #     X_len = X_len.clone()
     # else:  # CHECK!
     #     X_len = torch.LongTensor(X_len)
+    X_len = X_len_in.long()
     if max_len is not None:
         X_size = max_len
     elif X is not None:
