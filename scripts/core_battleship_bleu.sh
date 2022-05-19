@@ -54,3 +54,5 @@ fairseq-train \
     --eval-bleu-remove-bpe \
     --eval-bleu-print-samples \
     \
+    
+# --update-freq 2
