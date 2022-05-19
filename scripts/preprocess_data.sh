@@ -1,4 +1,32 @@
 #!sh
+##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}
+#!zsh
+# try_fairseq_dummy
+# "mylogs_dummy`date +%H%M%S`"
+# "mysaveddir_dummy`date +%H%M%S`"
+
+export PATH=`
+    `/home/jeffeuxmartin/miniconda3/bin:`
+    `/home/jeffeuxmartin/.local/bin:`
+    `:"$PATH"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/jeffeuxmartin/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/jeffeuxmartin/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/jeffeuxmartin/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/jeffeuxmartin/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+conda activate fairseq_env
+##########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 
 
 # === args === #
 Original_dataset_path=`   `"${Original_dataset_path:=data/LibriSpeechUnits}"
