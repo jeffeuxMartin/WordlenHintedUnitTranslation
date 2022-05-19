@@ -14,12 +14,12 @@ TEST_SPLIT=`              `"${TEST_SPLIT:=test-clean}"
 LOWERCASE="${LOWERCASE:=false}"
 
 # --- --- #
+SRCDIR="${SRCDIR:=collunits}" ; SRC="${SRC:=collunit}"
+TGTDIR="${TGTDIR:=texts}"     ; TGT="${TGT:=en}"
+LENDIR="${LENDIR:=lengths}"   ; LEN="${LEN:=len}"
+
 mkdir -p $Unbinarized_dataset_path
 mkdir -p $Binarized_dataset_path
-
-SRCDIR=collunits ; SRC=collunit
-TGTDIR=texts     ; TGT=en
-LENDIR=lengths   ; LEN=len
 
 cp $Original_dataset_path/$SRCDIR/$TRAIN_SPLIT.$SRC \
    $Unbinarized_dataset_path/train.$SRC
@@ -72,10 +72,11 @@ fairseq-preprocess \
 --workers $(python -c 'import os; print(len(os.sched_getaffinity(0)))')
 
 cp $Unbinarized_dataset_path/train.$LEN \
-   $Binarized_dataset_path/train.$SRC-$TGT.$LEN
+   $Binarized_dataset_path/train.$SRC-$TGT.len
    
 cp $Unbinarized_dataset_path/dev.$LEN \
-   $Binarized_dataset_path/valid.$SRC-$TGT.$LEN  # NOTE!
+   $Binarized_dataset_path/valid.$SRC-$TGT.len  # NOTE!
    
 cp $Unbinarized_dataset_path/test.$LEN \
-   $Binarized_dataset_path/test.$SRC-$TGT.$LEN
+   $Binarized_dataset_path/test.$SRC-$TGT.len
+# FIXME: bad! 不要硬規定死 .len 比較好！

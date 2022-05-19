@@ -1,4 +1,7 @@
-
+#!zsh
+# try_fairseq_dummy
+# "mylogs_dummy`date +%H%M%S`"
+# "mysaveddir_dummy`date +%H%M%S`"
 
 export PATH=`
     `/home/jeffeuxmartin/miniconda3/bin:`
@@ -24,52 +27,15 @@ conda activate fairseq_env
 
 cd /home/jeffeuxmartin/FairseqAudioWords
 
-fairseq-train data/BinFairseqLibriUnits \
-    --lr 2e-3 \
-    --max-tokens 4096 \
-    \
-   --user-dir WordlenHintedUnitTranslation/src \
-   --task wordlen_translation \
-   --arch iwslt_wordlen_transformer --optimizer adam \
-    --adam-betas '(0.9, 0.98)' \
-    \
-    ` # learning ` \
-    --clip-norm 1.0 \
-    --lr-scheduler inverse_sqrt \
-    --warmup-updates 4000 \
-    \
-    ` # regularization ` \
-    --dropout 0.3 \
-    --weight-decay 0.0001 \
-    \
-    ` # training ` \
-    --criterion label_smoothed_cross_entropy \
-    --label-smoothing 0.1 \
-    \
-    ` # logging ` \
-    --wandb-project ok_fairseq \
-    --log-file mynewlogs \
-    --save-dir mynewsaveddir \
-    \
-    ` # saving ` \
-    --keep-best-checkpoints 5 \
-    --keep-last-epochs 5 \
-    ` # --best-checkpoint-metric wer ` \
-    ` # --maximize-best-checkpoibnt-metric ` \
-    \
-    --fp16 \
-    \
-    --scoring wer \
-    --find-unused-parameters \
-    --max-epoch 200 \
-    # --maximize-best-checkpoint-metric --best-checkpoint-metric bleu --eval-bleu --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' --eval-bleu-detok moses --eval-bleu-remove-bpe --eval-bleu-print-samples
-    # ` # evaluation ` \
-    # --eval-bleu \
-    # --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
-    # --eval-bleu-detok moses \
-    # --eval-bleu-remove-bpe \
-    # --eval-bleu-print-samples \
-    # \
+DATAPATH=$DATAPATH ` # data/BinDummyUnits` \
+    MAXTOKENS=$MAXTOKENS ` # 4096 ` \
+    LR=$LR ` # 5e-4 ` \
+    EPOCHS=$EPOCHS ` # 200 ` \
+\
+    WANDBPROJ=$WANDBPROJ \
+    LOG_FILE=$LOG_FILE \
+    SAVE_DIR=$SAVE_DIR \
+zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh
 
 # TODO: length weight (w)
 # TODO: min length
