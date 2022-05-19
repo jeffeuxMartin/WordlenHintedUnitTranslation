@@ -20,3 +20,15 @@ DATAPATH=data/BinFairseqLibriUnits \
       hrun -s -c 16 -m 32 -GG -g 3090 \
       zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
 
+DATAPATH=data/BinFairseqLibriUnits \
+  MAXTOKENS=20480 LR=2e-2 EPOCHS=200 \
+  WANDBPROJ=LS_ASR LOG_FILE=ASR_Second__2eNeg2 SAVE_DIR=ASR_try2nd__2eNeg2 \
+      hrun ` ` -c 16 -m 32 -GG -g TITANRTX \
+      zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
+
+DATAPATH=data/BinFairseqLibriUnits \
+  MAXTOKENS=20480 LR=2e-5 EPOCHS=200 \
+  WANDBPROJ=LS_ASR LOG_FILE=ASR_Second__2eNeg5 SAVE_DIR=ASR_try2nd__2eNeg5 \
+      hrun ` ` -c 16 -m 32 -GG -g TITANRTX \
+      zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
+
