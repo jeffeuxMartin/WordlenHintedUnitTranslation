@@ -374,6 +374,7 @@ class BottleneckedTransformerModel(TransformerModel):
     
     @classmethod
     def build_model(cls, args, task):
+        breakpoint()
         if args.pretrained != '':
             print('\033[01;32m'"Load pretrained model!"'\033[0m')
             # SomehowTODO: if more than 1? better `load_model_ensemble`?
