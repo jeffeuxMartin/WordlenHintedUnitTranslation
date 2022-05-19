@@ -13,7 +13,6 @@ DATAPATH=data/BinFairseqLibriUnits \
       hrun -s -c 16 -m 32 -GGGG -g 3080Ti \
       zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
 
-
 DATAPATH=data/BinFairseqLibriUnits \
   MAXTOKENS=20480 LR=2e-3 EPOCHS=200 \
   WANDBPROJ=LS_ASR LOG_FILE=ASR_Second__2eNeg3 SAVE_DIR=ASR_try2nd__2eNeg3 \
