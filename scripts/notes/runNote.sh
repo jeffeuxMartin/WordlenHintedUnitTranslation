@@ -52,6 +52,7 @@ DATAPATH=data/BinFairseqLibriAE \
       hrun -s -c 16 -m 32 -GGGG -g 3080Ti \
       zsh WordlenHintedUnitTranslation/scripts/run_battleship.sh
 
+# ---------------------
 Original_dataset_path=../AudioWords/data/CoVoSTUnits \
 Unbinarized_dataset_path=data/BinFairseqCoVoSTUnits \
 Binarized_dataset_path=data/BinFairseqCoVoSTUnits \
@@ -63,3 +64,9 @@ TGT=de \
 LENDIR=wordlengths LEN=wordlen \
 hrun -s -c 16 -m 32 \
 zsh WordlenHintedUnitTranslation/scripts/preprocess_data.sh
+
+DATAPATH=data/BinFairseqCoVoSTUnits \
+  MAXTOKENS=$((40960 / 3)) LR=2e-4 EPOCHS=200 \
+  WANDBPROJ=CVST_ST LOG_FILE=ST__2eNeg4 SAVE_DIR=ST_try1st__2eNeg4 \
+      hrun -c 16 -m 32 -GGG -g TITANRTX \
+      zsh WordlenHintedUnitTranslation/scripts/run_battleship_bleu.sh
