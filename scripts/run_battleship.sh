@@ -28,13 +28,14 @@ conda activate fairseq_env
 cd /home/jeffeuxmartin/FairseqAudioWords
 
 DATAPATH=$DATAPATH ` # data/BinDummyUnits` \
-    MAXTOKENS=$MAXTOKENS ` # 4096 ` \
-    LR=$LR ` # 5e-4 ` \
-    EPOCHS=$EPOCHS ` # 200 ` \
 \
-    WANDBPROJ=$WANDBPROJ \
-    LOG_FILE=$LOG_FILE \
-    SAVE_DIR=$SAVE_DIR \
+MAXTOKENS=$MAXTOKENS ` # 4096 ` \
+LR=$LR ` # 5e-4 ` \
+EPOCHS=$EPOCHS ` # 200 ` \
+\
+WANDBPROJ=$WANDBPROJ \
+LOG_FILE=$LOG_FILE \
+SAVE_DIR=$SAVE_DIR \
 zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh
 
 # TODO: length weight (w)
