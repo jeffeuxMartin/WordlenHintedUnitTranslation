@@ -18,9 +18,6 @@ SRCDIR="${SRCDIR:=collunits}" ; SRC="${SRC:=collunit}"
 TGTDIR="${TGTDIR:=texts}"     ; TGT="${TGT:=en}"
 LENDIR="${LENDIR:=lengths}"   ; LEN="${LEN:=len}"
 
-echo $LEN
-sleep 3
-
 mkdir -p $Unbinarized_dataset_path
 mkdir -p $Binarized_dataset_path
 
