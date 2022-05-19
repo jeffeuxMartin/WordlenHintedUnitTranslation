@@ -1,5 +1,15 @@
 #!zsh
 
+WANDBPROJ=${WANDBPROJ:=none}
+if [[ $WANDBPROJ = none ]]; then
+WANDBArgs=''
+else
+IFS=' ' \
+WANDBArgs=(
+  --wandb-project $WANDBPROJ
+)
+fi
+
 fairseq-train \
     ` # =========== ` \
     ` # dataset ` \
@@ -37,7 +47,7 @@ fairseq-train \
     \
     \
     ` # logging ` \
-    --wandb-project $WANDBPROJ \
+    ${WANDBArgs[@]} \
     --log-file $LOG_FILE \
     --save-dir $SAVE_DIR \
     \
@@ -54,6 +64,7 @@ fairseq-train \
     --eval-bleu-detok moses \
     --eval-bleu-remove-bpe \
     --eval-bleu-print-samples \
+    --sacrebleu ` # TODO Checkme? ` \
     \
+    $@
     
-

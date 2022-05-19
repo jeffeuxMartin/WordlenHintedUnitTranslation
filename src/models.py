@@ -13,6 +13,7 @@ from fairseq.models import (
     register_model,
     register_model_architecture,
 )
+from fairseq import checkpoint_utils
 from .tasks import load_lengthaug_langpair_dataset
 from .torch_cif import cif_function
 from .utils import mask_generator
@@ -360,6 +361,7 @@ class BottleneckedTransformerModel(TransformerModel):
         parser.add_argument('--minimize-length', action='store_true', default=False)
         parser.add_argument('--skip-bottleneck', action='store_true', default=False)
         parser.add_argument('--return-all-cif', action='store_true', default=False)
+        parser.add_argument('--pretrained', type=str, default='')
         super(BottleneckedTransformerModel, 
               BottleneckedTransformerModel).add_args(parser)
         
@@ -372,10 +374,23 @@ class BottleneckedTransformerModel(TransformerModel):
     
     @classmethod
     def build_model(cls, args, task):
+        if args.pretrained != '':
+            print('\033[01;32m'"Load pretrained model!"'\033[0m')
+            # SomehowTODO: if more than 1? better `load_model_ensemble`?
+            assert len(args.pretrained.split(',')) <= 1, "How to more than 1 model?"
+            [pretrained], pretrained_args = checkpoint_utils.load_model_ensemble(
+                filenames=[args.pretrained], 
+                task=task)
+        else:
+            pretrained = None
         model = super().build_model(args, task)
+        if pretrained is not None:
+            model = cls(model.args, pretrained.encoder, model.decoder)
         if getattr(args, "fix_encoder", False):
             args.fix_encoder = True
             model.fix_encoder_()
+            for param in model.encoder.parameters():
+                param.requires_grad = False
         return model
         
     # TorchScript doesn't support optional arguments with variable length (**kwargs).

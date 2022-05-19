@@ -1,4 +1,6 @@
 #!sh
+Battleship=`   `"${Battleship:=true}"
+if [[ $Battleship = true ]]; then
 # region #########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}##########################3 \u{1F644}
 #!zsh
 # try_fairseq_dummy
@@ -27,7 +29,7 @@ unset __conda_setup
 
 conda activate fairseq_env
 # endregion #########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 ##########################3 
-
+fi
 # === args === #
 Original_dataset_path=`   `"${Original_dataset_path:=data/LibriSpeechUnits}"
 Unbinarized_dataset_path=``"${Unbinarized_dataset_path:=data/FairseqLibriUnits}"
