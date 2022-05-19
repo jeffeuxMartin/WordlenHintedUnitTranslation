@@ -381,7 +381,8 @@ class BottleneckedTransformerModel(TransformerModel):
             assert len(args.jeff_pretrained.split(',')) <= 1, "How to more than 1 model?"
             [pretrained], pretrained_args = checkpoint_utils.load_model_ensemble(
                 filenames=[args.jeff_pretrained], 
-                task=task)
+                # task=task,
+            )
         else:
             pretrained = None
         model = super().build_model(args, task)
