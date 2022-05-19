@@ -77,11 +77,11 @@ zsh WordlenHintedUnitTranslation/scripts/core_battleship.sh
 
 # * [x]    3. collunit_CIF___ASR 
 # * [x]    5. collunit_CIF_AE    
+# * [x]    4. collunit_CIF___ST  
 # ----------------------
 # # Chap3
 # * [x]    1. collunit_Tfm___ASR
 # * [x]    2. collunit_Tfm___ST
-# * [x]    4. collunit_CIF___ST  
 #   * [o]  6. collunit_CIF_AEASR 
 #   * [v]  7. collunit_CIF_AEST  
 # * [o]    8. fullunit_CIF_AE
