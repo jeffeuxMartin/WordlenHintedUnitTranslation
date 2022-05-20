@@ -541,3 +541,17 @@ def iwslt_wordlen_transformer(args):
     args.decoder_layers = getattr(args, "decoder_layers", 6)
     base_architecture(args)
 
+@register_model_architecture(
+    model_name="wordlen_transformer", 
+    arch_name="bart_wordlen_transformer")
+def iwslt_wordlen_transformer(args):
+    args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 768)
+    args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 12)
+    args.encoder_layers = getattr(args, "encoder_layers", 6)
+    args.decoder_embed_dbim = getattr(args, "decoder_embed_dim", 768)
+    # args.decoder_ffn_embed_dim = getattr(args, "decoder_ffn_embed_dim", 1024)
+    args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 12)
+    args.decoder_layers = getattr(args, "decoder_layers", 6)
+    base_architecture(args)
+

@@ -25,7 +25,7 @@ fairseq-train \
     ` # =========== ` \
     --user-dir WordlenHintedUnitTranslation/src \
     --task wordlen_translation \
-    --arch iwslt_wordlen_transformer \
+    --arch "${ARCH:=iwslt_wordlen_transformer}" \
     --criterion aug_label_smoothed_cross_entropy \
     ` # =========== ` \
     ` # training ` \
