@@ -544,7 +544,7 @@ def iwslt_wordlen_transformer(args):
 @register_model_architecture(
     model_name="wordlen_transformer", 
     arch_name="bart_wordlen_transformer")
-def iwslt_wordlen_transformer(args):
+def bart_wordlen_transformer(args):
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 768)
     args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 12)
